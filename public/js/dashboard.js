@@ -1,28 +1,73 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- VANTA.JS BACKGROUND INITIALIZATION ---
+    // --- VANTA.JS THEME CONFIGURATION ---
     let vantaEffect = null;
-    try {
-        vantaEffect = VANTA.WAVES({
-            el: "#vanta-bg",
-            mouseControls: false,
-            touchControls: false,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
+    const themeVantaSettings = {
+        blue: {
             color: 0x005aaa,
-            shininess: 25.00,
+            shininess: 30.00,
             waveHeight: 15.00,
             waveSpeed: 0.75,
             zoom: 0.90
-        });
-    } catch (e) {
-        console.error("Vanta.js initialization failed: ", e);
-        const vantaBg = document.getElementById('vanta-bg');
-        if(vantaBg) vantaBg.style.display = 'none';
-    }
+        },
+        dark: {
+            color: 0x1a1a1a, // Dark grey
+            shininess: 15.00,
+            waveHeight: 10.00,
+            waveSpeed: 0.60,
+            zoom: 0.90
+        },
+        green: {
+            color: 0x285028, // Forest green
+            shininess: 20.00,
+            waveHeight: 12.00,
+            waveSpeed: 0.70,
+            zoom: 0.90
+        },
+        grey: {
+            color: 0x808080, // Standard grey
+            shininess: 10.00,
+            waveHeight: 14.00,
+            waveSpeed: 0.65,
+            zoom: 0.90
+        }
+    };
 
+    /**
+     * Initializes or updates the VANTA.WAVES background effect based on the selected theme.
+     * It ensures any existing effect is destroyed before creating a new one to prevent
+     * performance issues.
+     * @param {string} theme - The name of the theme to apply (e.g., 'blue', 'dark').
+     */
+    const initializeVanta = (theme) => {
+        // Destroy the previous instance if it exists
+        if (vantaEffect) {
+            vantaEffect.destroy();
+        }
+
+        // Get the settings for the current theme, or default to blue
+        const settings = themeVantaSettings[theme] || themeVantaSettings.blue;
+
+        // Create a new Vanta instance with the selected theme's settings
+        try {
+            vantaEffect = VANTA.WAVES({
+                el: "#vanta-bg",
+                mouseControls: false,
+                touchControls: false,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                ...settings // Apply theme-specific settings
+            });
+        } catch (e) {
+            console.error("Vanta.js initialization failed: ", e);
+            const vantaBg = document.getElementById('vanta-bg');
+            if (vantaBg) vantaBg.style.display = 'none'; // Hide if Vanta fails
+        }
+    };
+
+    // --- CLEANUP ON PAGE UNLOAD ---
     window.addEventListener('beforeunload', () => {
         if (vantaEffect) vantaEffect.destroy();
     });
@@ -79,10 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let assetPieChart = null;
 
     // --- THEME LOGIC ---
+    /**
+     * Applies the selected theme to the body, saves it to localStorage,
+     * and updates the Vanta.js background to match.
+     * @param {string} theme - The theme name.
+     */
     const applyTheme = (theme) => {
         document.body.dataset.theme = theme;
         localStorage.setItem('assetManagementTheme', theme);
         themeSwitcher.value = theme;
+        initializeVanta(theme); // Dynamically update Vanta background
     };
     themeSwitcher.addEventListener('change', (e) => applyTheme(e.target.value));
 
